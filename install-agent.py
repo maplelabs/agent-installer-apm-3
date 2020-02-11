@@ -25,21 +25,21 @@ COLLCTD_SOURCE_URL = "https://github.com/maplelabs/collectd/releases/download/" 
                      "collectd-custom-5.6.2/collectd-custom-5.6.2.tar.bz2"
 COLLCTD_SOURCE_FILE = "collectd-custom-5.6.2"
 
-CONFIGURATOR_SOURCE_REPO = "https://github.com/SabariArunkumarP/configurator-exporter-apm"
+CONFIGURATOR_SOURCE_REPO = "https://github.com/maplelabs/configurator-exporter-apm-3"
 CONFIGURATOR_DIR = "/opt/sfapm/configurator-exporter/"
 
-COLLECTD_PLUGINS_REPO = "https://github.com/SabariArunkumarP/collectd-plugins"
-COLLECTD_PLUGINS_ZIP = "https://github.com/SabariArunkumarP/collectd-plugins/archive/master.zip"
-CONFIGURATOR_ZIP = "https://github.com/SabariArunkumarP/configurator-exporter-apm/archive/master.zip"
+COLLECTD_PLUGINS_REPO = "https://github.com/maplelabs/collectd-plugins"
+COLLECTD_PLUGINS_ZIP = "https://github.com/maplelabs/collectd-plugins/archive/master.zip"
+CONFIGURATOR_ZIP = "https://github.com/maplelabs/configurator-exporter-apm-3/archive/master.zip"
 COLLECTD_PLUGINS_DIR = "/opt/sfapm/collectd/plugins"
 COLLECTD_PLUGIN_MAPPING_FILE = "/opt/sfapm/configurator-exporter/config_handler/mapping/metrics_plugins_mapping.yaml"
 FLUENTD_PLUGIN_MAPPING_FILE = "/opt/sfapm/configurator-exporter/config_handler/mapping/logging_plugins_mapping.yaml"
 COLLECTD_CENTOS7_X86_64 = "https://github.com/maplelabs/collectd/releases/download/collectd-centos-7-1.0.2/collectd-centos-7.tar.bz2"
 COLLECTD_RHEL7_X86_64 = "https://github.com/maplelabs/collectd/releases/download/collectd-rhel-7-1.0.36/collectd-rhel-7.tar.bz2"
-COLLECTD_UBUNTU14_X86_64 = "https://github.com/maplelabs/collectd/releases/download/collectd-ubuntu-14-1.0.2/collectd-ubuntu-14.tar.bz2"
+COLLECTD_UBUNTU18_X86_64 = "https://github.com/maplelabs/collectd/releases/download/collectd-ubuntu-18-1.0.6/collectd-ubuntu-18.tar.bz2"
 COLLECTD_UBUNTU16_X86_64 = "https://github.com/maplelabs/collectd/releases/download/collectd-ubuntu-16-1.0.2/collectd-ubuntu-16.tar.bz2"
 FLUENTD_RHEL16_X86_64 = "https://github.com/snappyflow/omnibus-td-agent/releases/download/td-agent-rhel-7.1.0.2/td-agent-rhel7.tar.gz"
-FLUENTD_UBUNTU14_X86_64 = "https://github.com/snappyflow/omnibus-td-agent/releases/download/td-agent-ubuntu-14.1.0.2/td-agent-ubuntu14.tar.gz"
+FLUENTD_UBUNTU18_X86_64 = "https://github.com/snappyflow/omnibus-td-agent/releases/download/td-agent-ubuntu-18.1.0.3/td-agent-ubuntu18.tar.gz"
 FLUENTD_UBUNTU16_X86_64 = "https://github.com/snappyflow/omnibus-td-agent/releases/download/td-agent-ubuntu-16.1.0.3/td-agent-ubuntu16.tar.gz"
 FLUENTD_CENTOS7_X86_64 = "https://github.com/snappyflow/omnibus-td-agent/releases/download/td-agent-centos-7.1.0.38/td-agent-centos7.tar.gz"
 
@@ -397,6 +397,9 @@ class DeployAgent:
             if self.version.startswith("16"):
                 download_and_extract_tar(tarfile_url=COLLECTD_UBUNTU16_X86_64, local_file_name="/tmp/collectd-prebuilt.tar",
                                      proxy=self.proxy, extract_dir="/opt/sfapm", tarfile_type="r:bz2")
+            elif self.version.startswith("18"):
+                download_and_extract_tar(tarfile_url=COLLECTD_UBUNTU18_X86_64, local_file_name="/tmp/collectd-prebuilt.tar",
+                                     proxy=self.proxy, extract_dir="/opt/sfapm", tarfile_type="r:bz2")
             else:
                 #To be tested with other ubuntu versions
                 download_and_extract_tar(tarfile_url=COLLECTD_UBUNTU16_X86_64, local_file_name="/tmp/collectd-prebuilt.tar",
@@ -503,6 +506,9 @@ class DeployAgent:
                 if self.version.startswith("16"):
                     download_and_extract_tar(tarfile_url=FLUENTD_UBUNTU16_X86_64, local_file_name="/tmp/fluentd-prebuilt.tar",
                                      proxy=self.proxy, extract_dir="/opt/sfapm/", tarfile_type="r:")
+                elif self.version.startswith("18"):
+                    download_and_extract_tar(tarfile_url=FLUENTD_UBUNTU18_X86_64, local_file_name="/tmp/fluentd-prebuilt.tar",
+                                     proxy=self.proxy, extract_dir="/opt/sfapm/", tarfile_type="r:")
                 else:
                     #To be tested with other versions of Ubuntu
                     download_and_extract_tar(tarfile_url=FLUENTD_UBUNTU16_X86_64, local_file_name="/tmp/fluentd-prebuilt.tar",
@@ -578,6 +584,8 @@ class DeployAgent:
             shutil.copytree("/tmp/collectd-plugins-master", "/opt/sfapm/collectd/plugins")
         except shutil.Error as err:
             print >> sys.stderr, err
+        #Changed data dir to use base path /opt/sfapm/collectd
+        self._run_cmd("sed -i 's/\/opt\/collectd\/var\/lib/\/opt\/sfapm\/collectd\/var\/lib/g' /opt/sfapm/collectd/plugins/constants.py", shell=True, ignore_err=True)
         py_requirements = "{0}/requirements.txt".format(COLLECTD_PLUGINS_DIR)
         pip_pckgs = self.get_required_pippack_to_be_inst(py_requirements)
         if pip_pckgs:
@@ -641,7 +649,7 @@ class DeployAgent:
         download_file(CONFIGURATOR_ZIP, local_path="/tmp/configurator.zip", proxy=self.proxy)
         unzip_file("/tmp/configurator.zip")
         try:
-            shutil.copytree("/tmp/configurator-exporter-apm-master", "/opt/sfapm/configurator-exporter/")
+            shutil.copytree("/tmp/configurator-exporter-apm-3-master", "/opt/sfapm/configurator-exporter/")
         except shutil.Error as err:
             print >> sys.stderr, err
 
@@ -930,5 +938,5 @@ if __name__ == '__main__':
             http_proxy=args.http_proxy,
             https_proxy=args.https_proxy,
             retries=args.retries,
-	        plugin_input= args.plugin_input,
+            plugin_input= args.plugin_input,
             update = args.update_agents )
