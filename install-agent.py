@@ -586,6 +586,8 @@ class DeployAgent:
             print >> sys.stderr, err
         #Changed data dir to use base path /opt/sfapm/collectd
         self._run_cmd("sed -i 's/\/opt\/collectd\/var\/lib/\/opt\/sfapm\/collectd\/var\/lib/g' /opt/sfapm/collectd/plugins/constants.py", shell=True, ignore_err=True)
+        self._run_cmd("sed -i 's/\/opt\/collectd/\/opt\/sfapm\/collectd/g' /opt/sfapm/collectd/plugins/libjolokia.py",shell=True, ignore_err=True)
+        self._run_cmd("sed -i 's/\/opt\/collectd/\/opt\/sfapm\/collectd/g' /opt/sfapm/collectd/plugins/libtomcatjolokia.py",shell=True, ignore_err=True)
         py_requirements = "{0}/requirements.txt".format(COLLECTD_PLUGINS_DIR)
         pip_pckgs = self.get_required_pippack_to_be_inst(py_requirements)
         if pip_pckgs:
