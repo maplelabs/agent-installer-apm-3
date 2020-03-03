@@ -84,7 +84,7 @@ def uninstall_collecd():
     if os.path.exists("/etc/systemd/system/collectd.service"):
         os.remove("/etc/systemd/system/collectd.service")
     if os.path.exists("/opt/sfapm/sfapm-venv"):
-        os.remove("/opt/sfapm/sfapm-venv")
+        shutil.rmtree("/opt/sfapm/sfapm-venv")
     run_cmd("kill $(ps aux | grep -v grep | grep 'collectd' | awk '{print $2}')", shell=True, ignore_err=True)
 
 
