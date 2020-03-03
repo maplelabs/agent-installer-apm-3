@@ -339,7 +339,7 @@ class DeployAgent:
         else:
             cmd2 = "{0} install virtualenv".format(self.pip_def_env)
         self._run_cmd(cmd2, shell=True)
-        create_venv = "virtualenv /opt/sfapm/sfapm-venv/"
+        create_venv = "{0} -m virtualenv /opt/sfapm/sfapm-venv/".format(self.python_def_env)
         self._run_cmd(create_venv, shell=True)
         print "Downgrading pip to 9.0.2 in virtual env"
         if self.proxy:
